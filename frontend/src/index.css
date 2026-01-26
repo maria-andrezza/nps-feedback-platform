@@ -1,0 +1,37 @@
+/* src/index.css - VERSÃO SIMPLIFICADA PARA SISTEMA NPS */
+:root {
+  font-family: "Segoe UI", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: inherit;
+  background-color: #f5f5f5; /* Fundo claro para sistema */
+  color: #333;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Remove estilos do tema escuro que podem atrapalhar */
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+}
