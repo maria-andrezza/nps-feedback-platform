@@ -1,11 +1,18 @@
-🚀 NPS Platform MVP - Full Stack
-Este projeto é uma plataforma completa de gerenciamento de Net Promoter Score (NPS), desenvolvida para unir a visão estratégica de Customer Success com o poder do desenvolvimento Full Stack.
+🚀 NPS Feedback Platform (Full Stack)
+Esta plataforma foi desenvolvida para solucionar um problema real de negócio: a gestão e análise de feedbacks de clientes através da metodologia NPS (Net Promoter Score). Unindo minha experiência em Customer Success com o desenvolvimento de software, criei uma solução robusta para gerenciamento de usuários e coleta de insights.
 
 ## 📺 Demonstração em Vídeo
 
-Confira o funcionamento real da plataforma (Login, Autenticação JWT e Gerenciamento Dinâmico de Usuários):
+[![Assista à demonstração da NPS Platform](https://img.youtube.com/vi/JiyHZ6CiWt0/0.jpg)](https://www.youtube.com/watch?v=JiyHZ6CiWt0)
 
-![Demonstração do Sistema](sistemanps.mp4)
+_Clique na imagem acima para ver o vídeo completo com:_
+
+- _Login e autenticação JWT_
+- _Dashboard de métricas em tempo real_
+- _Funil de aprovação de feedbacks_
+- _CRUD completo de usuários_
+
+🔗 **Link direto:** https://www.youtube.com/watch?v=JiyHZ6CiWt0
 
 💡 A Origem do Projeto
 Inspirada pela minha trajetória em empresas de tecnologia e SaaS, identifiquei que o maior desafio na gestão de experiência do cliente não é apenas a coleta de dados, mas a execução eficiente do "fechamento do ciclo" (closed loop).
@@ -40,7 +47,7 @@ Acompanhamento das melhorias contínuas e desafios técnicos superados durante o
 - Recentemente, o projeto passou por uma fase de Sustentação e Refatoração, onde implementei:
 - Saneamento de Banco de Dados: Identificação e correção de inconsistências no PostgreSQL (via Neon Cloud). Realizei o tratamento de registros "órfãos" (sem vínculos de empresa/usuário) para garantir que as métricas do Dashboard fossem 100% íntegras.
 - Refatoração de Código (Clean Code): Remoção de variáveis e funções obsoletas após a transição para o novo sistema de funil, reduzindo a dívida técnica e melhorando a manutenibilidade.
-- # Otimização de Deploy: Configuração de rotas na Vercel via vercel.json para suporte a Client-side Routing, garantindo que links diretos de pesquisa de satisfação funcionem perfeitamente em produção.
+- Otimização de Deploy: Configuração de rotas na Vercel via vercel.json para suporte a Client-side Routing, garantindo que links diretos de pesquisa de satisfação funcionem perfeitamente em produção.
   Banco de Dados: PostgreSQL (Hospedado via Neon Cloud)
 
 Deploy: Vercel (Frontend) e Render (Backend).
