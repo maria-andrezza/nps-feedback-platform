@@ -549,8 +549,8 @@ export default function Usuarios() {
           {selectedUsuario ? "Editar Usuário" : "Novo Usuário"}
           {backendError && " (Modo Offline)"}
         </DialogTitle>
-        <DialogContent sx={{ pt: 3 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <DialogContent sx={{ pt: 4, pb: 2 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <TextField
               fullWidth
               label="Nome Completo"
