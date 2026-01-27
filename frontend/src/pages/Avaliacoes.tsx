@@ -58,9 +58,10 @@ export default function Avaliacoes() {
   const { user } = useAuth();
 
   // Filtros e ordenação
+  const [filtroProcessoAdmin, setFiltroProcessoAdmin] =
+    useState<string>("todos");
   const [filtroStatusOperacional, setFiltroStatusOperacional] =
     useState<string>("todos");
-  const [filtroStatusAdmin, setFiltroStatusAdmin] = useState<string>("todos");
   const [ordenacao, setOrdenacao] = useState<
     "crescente" | "decrescente" | "nenhuma"
   >("nenhuma");
@@ -269,13 +270,9 @@ export default function Avaliacoes() {
     setFiltroStatusOperacional(event.target.value);
   };
 
-  const handleFiltroStatusAdminChange = (event: SelectChangeEvent) => {
-    setFiltroStatusAdmin(event.target.value);
-  };
-
   const limparFiltros = () => {
     setFiltroStatusOperacional("todos");
-    setFiltroStatusAdmin("todos");
+    setFiltroProcessoAdmin("todos"); // Adicione esta linha para limpar o novo filtro
     setOrdenacao("nenhuma");
     setBusca("");
   };
@@ -300,10 +297,24 @@ export default function Avaliacoes() {
       );
     }
 
-    if (user?.role === "admin" && filtroStatusAdmin !== "todos") {
-      result = result.filter(
-        (av) => (av.status_admin || "pendente") === filtroStatusAdmin,
-      );
+    if (user?.role === "admin" && filtroProcessoAdmin !== "todos") {
+      result = result.filter((av) => {
+        const statusOp = av.status_operacional || av.status || "pendente";
+        const statusAdm = av.status_admin || "pendente";
+
+        switch (filtroProcessoAdmin) {
+          case "aguardando_operacional":
+            return statusOp === "pendente";
+          case "pendente_aprovacao":
+            return statusOp === "resolvido" && statusAdm === "pendente";
+          case "aprovados":
+            return statusAdm === "aprovado";
+          case "reprovados":
+            return statusAdm === "reprovado";
+          default:
+            return true;
+        }
+      });
     }
 
     if (busca) {
@@ -660,43 +671,52 @@ export default function Avaliacoes() {
               }}
             />
 
-            <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel
-                sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-              >
-                <BuildIcon sx={{ fontSize: 18 }} />
-                Status Operacional
-              </InputLabel>
-              <Select
-                value={filtroStatusOperacional}
-                label="Status Operacional"
-                onChange={handleFiltroStatusOperacionalChange}
-                sx={{ borderRadius: 2 }}
-              >
-                <MenuItem value="todos">Todos</MenuItem>
-                <MenuItem value="pendente">Pendente</MenuItem>
-                <MenuItem value="resolvido">Resolvido</MenuItem>
-              </Select>
-            </FormControl>
-
+            {/* Filtro específico para o Admin - Visão de Funil (Pipeline) */}
             {user?.role === "admin" && (
-              <FormControl size="small" sx={{ minWidth: 200 }}>
+              <FormControl size="small" sx={{ minWidth: 250 }}>
                 <InputLabel
                   sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
                 >
                   <GavelIcon sx={{ fontSize: 18 }} />
-                  Status Admin
+                  Estágio do Processo
                 </InputLabel>
                 <Select
-                  value={filtroStatusAdmin}
-                  label="Status Admin"
-                  onChange={handleFiltroStatusAdminChange}
+                  value={filtroProcessoAdmin}
+                  label="Estágio do Processo"
+                  onChange={(e) => setFiltroProcessoAdmin(e.target.value)}
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="todos">Todos os registros</MenuItem>
+                  <MenuItem value="aguardando_operacional">
+                    1. Aguardando Resolução (Operacional)
+                  </MenuItem>
+                  <MenuItem value="pendente_aprovacao">
+                    2. Pendente de minha Aprovação
+                  </MenuItem>
+                  <MenuItem value="aprovados">3. Aprovados</MenuItem>
+                  <MenuItem value="reprovados">4. Reprovados</MenuItem>
+                </Select>
+              </FormControl>
+            )}
+
+            {/* Filtro mantido para o Operacional (sem mudanças no fluxo deles) */}
+            {user?.role === "operacional" && (
+              <FormControl size="small" sx={{ minWidth: 200 }}>
+                <InputLabel
+                  sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                >
+                  <BuildIcon sx={{ fontSize: 18 }} />
+                  Status Operacional
+                </InputLabel>
+                <Select
+                  value={filtroStatusOperacional}
+                  label="Status Operacional"
+                  onChange={handleFiltroStatusOperacionalChange}
                   sx={{ borderRadius: 2 }}
                 >
                   <MenuItem value="todos">Todos</MenuItem>
                   <MenuItem value="pendente">Pendente</MenuItem>
-                  <MenuItem value="aprovado">Aprovado</MenuItem>
-                  <MenuItem value="reprovado">Reprovado</MenuItem>
+                  <MenuItem value="resolvido">Resolvido</MenuItem>
                 </Select>
               </FormControl>
             )}
@@ -728,7 +748,7 @@ export default function Avaliacoes() {
             </Tooltip>
 
             {(filtroStatusOperacional !== "todos" ||
-              filtroStatusAdmin !== "todos" ||
+              filtroProcessoAdmin !== "todos" ||
               ordenacao !== "nenhuma" ||
               busca) && (
               <Tooltip title="Limpar filtros">
