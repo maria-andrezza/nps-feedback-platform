@@ -756,7 +756,7 @@ app.get("/api/admin/usuarios", auth(["admin"]), async (req, res) => {
   try {
     const query = `
       SELECT 
-        id, nome, email, role, created_at, empresa_id
+        id, nome, email, role, status, created_at, empresa_id -- Adicionado 'status'
       FROM usuarios
       WHERE role != 'master'
       ORDER BY created_at DESC
@@ -766,10 +766,7 @@ app.get("/api/admin/usuarios", auth(["admin"]), async (req, res) => {
 
     res.json({
       success: true,
-      usuarios: result.rows.map((user) => ({
-        ...user,
-        status: "ativo",
-      })),
+      usuarios: result.rows, // Agora retorna os dados puros do banco
       total: result.rowCount,
     });
   } catch (error) {
@@ -950,6 +947,41 @@ app.delete("/api/admin/usuarios/:id", auth(["admin"]), async (req, res) => {
       success: false,
       error: "Erro ao deletar usuário",
       details: error.message,
+    });
+  }
+});
+app.put("/api/admin/usuarios/:id/status", auth(["admin"]), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // 1. Executa a atualização no PostgreSQL
+    // O comando UPDATE altera o campo 'status' para o valor recebido ('ativo' ou 'inativo')
+    const result = await pool.query(
+      "UPDATE usuarios SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING id, nome, status",
+      [status, id],
+    );
+
+    // 2. Verifica se o usuário foi encontrado e atualizado
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "Usuário não encontrado",
+      });
+    }
+
+    // 3. Envia a resposta de sucesso com os dados atualizados
+    res.json({
+      success: true,
+      message: `Usuário ${status === "ativo" ? "ativado" : "inativado"} com sucesso!`,
+      usuario: result.rows[0],
+    });
+  } catch (error) {
+    // Registra o erro detalhado no terminal para facilitar o debug
+    console.error("❌ Erro ao alterar status:", error);
+    res.status(500).json({
+      success: false,
+      error: "Erro ao processar alteração",
     });
   }
 });
