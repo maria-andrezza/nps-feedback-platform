@@ -3,7 +3,7 @@ import axios, { AxiosInstance } from "axios";
 
 // Criar instância do axios
 const api: AxiosInstance = axios.create({
-  baseURL: "http://localhost:3001",
+  baseURL: "https://nps-feedback-platform.onrender.com",
   timeout: 10000,
 });
 
