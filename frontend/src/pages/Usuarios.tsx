@@ -1,4 +1,3 @@
-// src/pages/Usuarios.tsx - VERSÃO ATUALIZADA E LIMPA
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -22,14 +21,16 @@ import {
   CardActions,
   Avatar,
   Snackbar,
-} from "@mui/material"; // 'Paper' removido por não ser utilizado
+} from "@mui/material";
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   PersonAdd as PersonAddIcon,
   AdminPanelSettings as AdminIcon,
   WorkspacePremium as OperacionalIcon,
-} from "@mui/icons-material"; // Ícones não utilizados removidos para limpar o VS Code
+  CheckCircle as CheckCircleIcon,
+  Block as BlockIcon,
+} from "@mui/icons-material";
 import api from "../services/api";
 
 interface Usuario {
@@ -37,28 +38,13 @@ interface Usuario {
   nome: string;
   email: string;
   role: "operacional" | "admin";
-  status: "ativo" | "inativo";
+  ativo: boolean; // Alterado de 'status' para 'ativo' conforme seu banco
 }
 
 export default function Usuarios() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [usuarios, setUsuarios] = useState<Usuario[]>([
-    {
-      id: 1,
-      nome: "Administrador Master",
-      email: "admin@nps.com",
-      role: "admin",
-      status: "ativo",
-    },
-    {
-      id: 2,
-      nome: "João Silva",
-      email: "joao.silva@empresa.com",
-      role: "operacional",
-      status: "ativo",
-    },
-  ]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
@@ -83,11 +69,14 @@ export default function Usuarios() {
     try {
       setLoading(true);
       const res = await api.get("/api/admin/usuarios");
-      if (res.data && Array.isArray(res.data)) {
-        setUsuarios(res.data);
-      }
+      // Mapeia os dados do banco para garantir que o campo 'ativo' seja reconhecido
+      const dadosFormatados = res.data.map((u: any) => ({
+        ...u,
+        ativo: u.ativo !== undefined ? u.ativo : true,
+      }));
+      setUsuarios(dadosFormatados);
     } catch (err) {
-      console.log("⚠️ Backend offline, usando dados locais.");
+      setError("Erro ao carregar usuários do banco de dados.");
     } finally {
       setLoading(false);
     }
@@ -113,41 +102,44 @@ export default function Usuarios() {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedUsuario(null);
-    setError("");
   };
 
   const handleSalvarUsuario = async () => {
-    if (!formData.nome.trim() || !formData.email.trim()) {
-      setError("Nome e email são obrigatórios");
-      return;
-    }
     try {
       if (selectedUsuario) {
-        const { senha, ...dadosParaEnviar } = formData;
-        await api.put(
-          `/api/admin/usuarios/${selectedUsuario.id}`,
-          dadosParaEnviar,
-        );
-        setSuccess("Usuário atualizado com sucesso!");
+        await api.put(`/api/admin/usuarios/${selectedUsuario.id}`, formData);
+        setSuccess("Usuário atualizado!");
       } else {
         await api.post("/api/admin/usuarios", formData);
-        setSuccess("Usuário criado com sucesso!");
+        setSuccess("Usuário criado!");
       }
       carregarUsuarios();
       handleCloseDialog();
     } catch (err: any) {
-      setError(err.response?.data?.error || "Erro ao salvar usuário");
+      setError("Erro ao salvar usuário.");
+    }
+  };
+
+  const handleToggleStatus = async (usuario: Usuario) => {
+    try {
+      await api.put(`/api/admin/usuarios/${usuario.id}/status`, {
+        ativo: !usuario.ativo,
+      });
+      setSuccess(`Usuário ${usuario.ativo ? "desativado" : "ativado"}!`);
+      carregarUsuarios();
+    } catch (err) {
+      setError("Erro ao alterar status.");
     }
   };
 
   const handleDeletarUsuario = async (id: number) => {
-    if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
+    if (!confirm("Excluir usuário permanentemente?")) return;
     try {
       await api.delete(`/api/admin/usuarios/${id}`);
-      setUsuarios((prev) => prev.filter((u) => u.id !== id));
       setSuccess("Usuário removido!");
+      carregarUsuarios();
     } catch (err) {
-      setError("Erro ao excluir usuário");
+      setError("Erro ao excluir.");
     }
   };
 
@@ -160,14 +152,7 @@ export default function Usuarios() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 6 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 4,
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 4 }}>
         <Typography variant="h5" color="primary" fontWeight="600">
           Gerenciar Usuários
         </Typography>
@@ -175,7 +160,6 @@ export default function Usuarios() {
           variant="contained"
           startIcon={<PersonAddIcon />}
           onClick={() => handleOpenDialog()}
-          sx={{ borderRadius: 2 }}
         >
           Novo Usuário
         </Button>
@@ -187,68 +171,79 @@ export default function Usuarios() {
         </Alert>
       )}
 
-      <Grid container spacing={3}></Grid>
-
       <Grid container spacing={3}>
-        {usuarios.map((usuario) => (
-          <Grid item xs={12} sm={6} md={4} key={usuario.id}>
-            <Card sx={{ borderRadius: 2, boxShadow: 2 }}>
+        {usuarios.map((u) => (
+          <Grid item xs={12} sm={6} md={4} key={u.id}>
+            <Card sx={{ borderRadius: 2, opacity: u.ativo ? 1 : 0.6 }}>
               <CardContent>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                   <Avatar
                     sx={{
                       bgcolor:
-                        usuario.role === "admin"
-                          ? "primary.main"
-                          : "success.main",
+                        u.role === "admin" ? "primary.main" : "success.main",
                       mr: 2,
                     }}
                   >
-                    {usuario.nome.charAt(0).toUpperCase()}
+                    {u.nome.charAt(0)}
                   </Avatar>
                   <Box>
-                    <Typography
-                      variant="h6"
-                      sx={{ fontSize: "1.1rem", fontWeight: 600 }}
-                    >
-                      {usuario.nome}
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      {/* Aqui usamos o AdminIcon e o OperacionalIcon para limpar os avisos do VS Code */}
+                      <Chip
+                        icon={
+                          u.role === "admin" ? (
+                            <AdminIcon />
+                          ) : (
+                            <OperacionalIcon />
+                          )
+                        }
+                        label={u.role.toUpperCase()}
+                        color={u.role === "admin" ? "primary" : "success"}
+                        size="small"
+                        variant="outlined"
+                      />
+                      <Chip
+                        label={u.ativo ? "Ativo" : "Inativo"}
+                        size="small"
+                      />
+                    </Box>
+                    <Typography variant="h6" noWrap>
+                      {u.nome}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {usuario.email}
+                    <Typography variant="body2" color="textSecondary" noWrap>
+                      {u.email}
                     </Typography>
                   </Box>
                 </Box>
-                <Chip
-                  icon={
-                    usuario.role === "admin" ? (
-                      <AdminIcon />
-                    ) : (
-                      <OperacionalIcon />
-                    )
-                  }
-                  label={usuario.role.toUpperCase()}
-                  color={usuario.role === "admin" ? "primary" : "success"}
-                  size="small"
-                  variant="outlined"
-                />
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Chip
+                    label={u.role}
+                    size="small"
+                    color={u.role === "admin" ? "primary" : "success"}
+                  />
+                  <Chip
+                    label={u.ativo ? "Ativo" : "Inativo"}
+                    size="small"
+                    variant="outlined"
+                  />
+                </Box>
               </CardContent>
               <CardActions
-                sx={{
-                  justifyContent: "flex-end",
-                  bgcolor: "#f9f9f9",
-                  borderTop: "1px solid #eee",
-                }}
+                sx={{ justifyContent: "flex-end", bgcolor: "#f9f9f9" }}
               >
-                <IconButton
-                  onClick={() => handleOpenDialog(usuario)}
-                  color="primary"
-                >
+                <IconButton onClick={() => handleOpenDialog(u)} color="primary">
                   <EditIcon />
                 </IconButton>
                 <IconButton
-                  onClick={() => handleDeletarUsuario(usuario.id)}
+                  onClick={() => handleToggleStatus(u)}
+                  color={u.ativo ? "warning" : "success"}
+                >
+                  {u.ativo ? <BlockIcon /> : <CheckCircleIcon />}
+                </IconButton>
+                <IconButton
+                  onClick={() => handleDeletarUsuario(u.id)}
                   color="error"
-                  disabled={usuario.id === user?.id}
+                  disabled={u.id === user?.id}
                 >
                   <DeleteIcon />
                 </IconButton>
@@ -263,13 +258,10 @@ export default function Usuarios() {
         onClose={handleCloseDialog}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 2 } }}
       >
         <DialogTitle sx={{ bgcolor: "primary.main", color: "white" }}>
-          {selectedUsuario ? "Editar Usuário" : "Novo Usuário"}
+          {selectedUsuario ? "Editar" : "Novo"} Usuário
         </DialogTitle>
-
-        {/* CORREÇÃO DEFINITIVA DO LAYOUT: Padding superior forçado */}
         <DialogContent sx={{ pt: "24px !important", pb: 2 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}>
             <TextField
@@ -279,34 +271,17 @@ export default function Usuarios() {
               onChange={(e) =>
                 setFormData({ ...formData, nome: e.target.value })
               }
-              required
               variant="outlined"
             />
             <TextField
               fullWidth
               label="Email"
-              type="email"
               value={formData.email}
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
-              required
               variant="outlined"
             />
-            {!selectedUsuario && (
-              <TextField
-                fullWidth
-                label="Senha"
-                type="password"
-                value={formData.senha}
-                onChange={(e) =>
-                  setFormData({ ...formData, senha: e.target.value })
-                }
-                required
-                variant="outlined"
-                helperText="Mínimo 6 caracteres"
-              />
-            )}
             <TextField
               fullWidth
               select
@@ -323,24 +298,16 @@ export default function Usuarios() {
             </TextField>
           </Box>
         </DialogContent>
-
-        <DialogActions sx={{ p: 2, px: 3 }}>
-          <Button
-            onClick={handleCloseDialog}
-            variant="outlined"
-            color="inherit"
-          >
-            Cancelar
-          </Button>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleCloseDialog}>Cancelar</Button>
           <Button onClick={handleSalvarUsuario} variant="contained">
-            {selectedUsuario ? "Atualizar" : "Criar"}
+            Salvar
           </Button>
         </DialogActions>
       </Dialog>
-
       <Snackbar
         open={!!success}
-        autoHideDuration={4000}
+        autoHideDuration={3000}
         onClose={() => setSuccess("")}
         message={success}
       />
