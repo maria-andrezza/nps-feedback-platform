@@ -21,6 +21,14 @@ Backend: Node.js, Express, Prisma ORM, JWT, Bcrypt.
 - Regras de Negócio Integradas: Validação automática de status de empresa e bloqueio de feedbacks para entidades inativas.
 - Painel de Indicadores Real-time: Dashboard dinâmico com cálculo de NPS Score e segmentação automática de clientes.
 
+📈 Log de Evolução
+Acompanhamento das melhorias contínuas e desafios técnicos superados durante o desenvolvimento:
+
+- Data: 27 de Janeiro de 2026.
+- Melhoria: Implementação do fluxo completo de inativação de usuários (Frontend + Backend).
+- Desafio Superado: Integração de rotas PUT com banco de dados PostgreSQL (Neon) em ambiente de produção distribuído (Render/Vercel), incluindo a resolução de conflitos de Base URL.
+- Habilidade Técnica: Domínio de CI/CD, gerenciamento de estados complexos no React e persistência de dados com auditoria através da coluna updated_at.
+
 ## 🛠️ Manutenção e Integridade de Dados (Novo!)
 
 - Recentemente, o projeto passou por uma fase de Sustentação e Refatoração, onde implementei:
