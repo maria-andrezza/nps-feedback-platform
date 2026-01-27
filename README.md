@@ -1,6 +1,12 @@
 🚀 NPS Platform MVP - Full Stack
 Este projeto é uma plataforma completa de gerenciamento de Net Promoter Score (NPS), desenvolvida para unir a visão estratégica de Customer Success com o poder do desenvolvimento Full Stack.
 
+## 📺 Demonstração em Vídeo
+
+Confira o funcionamento real da plataforma (Login, Autenticação JWT e Gerenciamento Dinâmico de Usuários):
+
+![Demonstração do Sistema](sistemanps.mp4)
+
 💡 A Origem do Projeto
 Inspirada pela minha trajetória em empresas de tecnologia e SaaS, identifiquei que o maior desafio na gestão de experiência do cliente não é apenas a coleta de dados, mas a execução eficiente do "fechamento do ciclo" (closed loop).
 
