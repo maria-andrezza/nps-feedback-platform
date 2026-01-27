@@ -14,10 +14,17 @@ Baseado na minha experiência como **Analista de Sucesso do Cliente**, identifiq
 
 ## 🌟 Diferenciais Técnicos
 
-- **Sistema de Autenticação Robusto:** Implementação de JWT com diferentes níveis de acesso (Admin vs Operacional).
-- **Gestão de Estados:** Uso de Context API para persistência de dados de autenticação e controle de acesso em rotas privadas.
-- **Regras de Negócio Integradas:** Validação de status de empresa (empresas inativas ou excluídas são bloqueadas automaticamente de receber novos feedbacks).
-- **Painel de Indicadores:** Dashboard dinâmico com cálculo em tempo real de NPS Score, segmentação de clientes (Promotores, Neutros e Detratores) e rankings de empresas.
+- Sistema de Autenticação e Autorização: Implementação de JWT com controle de acesso granular. A interface se adapta dinamicamente ao cargo do usuário (Admin vs Operacional).
+- UX Persona-Based (Funil de Aprovação): Reformulação da visão do Administrador, substituindo filtros técnicos por um Funil de Processo (Pipeline). O Admin foca no fluxo de decisão: Aguardando Operacional ➔ Pendente de Aprovação ➔ Finalizado.
+- Gestão de Estados Complexos: Uso de useState e useEffect para garantir que os filtros de funil não entrem em conflito com as regras de negócio do time operacional.
+- Regras de Negócio Integradas: Validação automática de status de empresa e bloqueio de feedbacks para entidades inativas.
+- Painel de Indicadores Real-time: Dashboard dinâmico com cálculo de NPS Score e segmentação automática de clientes.
+
+## 🛠️ Manutenção e Integridade de Dados (Novo!)
+- Recentemente, o projeto passou por uma fase de Sustentação e Refatoração, onde implementei:
+- Saneamento de Banco de Dados: Identificação e correção de inconsistências no PostgreSQL (via Neon Cloud). Realizei o tratamento de registros "órfãos" (sem vínculos de empresa/usuário) para garantir que as métricas do Dashboard fossem 100% íntegras.
+- Refatoração de Código (Clean Code): Remoção de variáveis e funções obsoletas após a transição para o novo sistema de funil, reduzindo a dívida técnica e melhorando a manutenibilidade.
+- Otimização de Deploy: Configuração de rotas na Vercel via vercel.json para suporte a Client-side Routing, garantindo que links diretos de pesquisa de satisfação funcionem perfeitamente em produção.
 
 ## 🛠️ Como Executar o Projeto
 
