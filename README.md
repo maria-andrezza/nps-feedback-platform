@@ -15,8 +15,6 @@ Frontend: React, TypeScript, Material UI (MUI), Axios, React Router Dom.
 
 Backend: Node.js, Express, Prisma ORM, JWT, Bcrypt.
 
-<<<<<<< HEAD
-
 - Sistema de Autenticação e Autorização: Implementação de JWT com controle de acesso granular. A interface se adapta dinamicamente ao cargo do usuário (Admin vs Operacional).
 - UX Persona-Based (Funil de Aprovação): Reformulação da visão do Administrador, substituindo filtros técnicos por um Funil de Processo (Pipeline). O Admin foca no fluxo de decisão: Aguardando Operacional ➔ Pendente de Aprovação ➔ Finalizado.
 - Gestão de Estados Complexos: Uso de useState e useEffect para garantir que os filtros de funil não entrem em conflito com as regras de negócio do time operacional.
@@ -34,15 +32,12 @@ Backend: Node.js, Express, Prisma ORM, JWT, Bcrypt.
 Deploy: Vercel (Frontend) e Render (Backend).
 
 🌟 Diferenciais Técnicos
-UX Persona-Based (Funil de Aprovação): Interface adaptativa que organiza o fluxo de trabalho do Administrador em estágios estratégicos: Aguardando Operacional ➔ Pendente de Aprovação ➔ Finalizado.
 
-Sistema de Autenticação Robusto: Implementação de JWT com diferentes níveis de acesso (Admin vs Operacional).
-
-Integridade de Dados e Saneamento: Manutenção ativa do banco de dados PostgreSQL para garantir métricas 100% íntegras, eliminando inconsistências e registros órfãos.
-
-Regras de Negócio Integradas: Validação de status de empresa (bloqueio automático de feedbacks para empresas inativas).
-
-Painel de Indicadores: Dashboard dinâmico com cálculo em tempo real de NPS Score e rankings de performance.
+- UX Persona-Based (Funil de Aprovação): Interface adaptativa que organiza o fluxo de trabalho do Administrador em estágios estratégicos: Aguardando Operacional ➔ Pendente de Aprovação ➔ Finalizado.
+- Sistema de Autenticação Robusto: Implementação de JWT com diferentes níveis de acesso (Admin vs Operacional).
+- Integridade de Dados e Saneamento: Manutenção ativa do banco de dados PostgreSQL para garantir métricas 100% íntegras, eliminando inconsistências e registros órfãos.
+- Regras de Negócio Integradas: Validação de status de empresa (bloqueio automático de feedbacks para empresas inativas).
+- Painel de Indicadores: Dashboard dinâmico com cálculo em tempo real de NPS Score e rankings de performance.
 
 🛠️ Como Executar o Projeto
 
@@ -51,7 +46,7 @@ Painel de Indicadores: Dashboard dinâmico com cálculo em tempo real de NPS Sco
 Bash
 git clone https://github.com/maria-andrezza/nps-feedback-platform.git 2. Configurar o Backend:
 
-Acesse a pasta: cd backend
+2. Acesse a pasta: cd backend
 
 Instale as dependências: npm install
 
