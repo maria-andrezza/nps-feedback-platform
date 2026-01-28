@@ -3,44 +3,41 @@ Esta plataforma foi desenvolvida para solucionar um problema real de negócio: a
 
 📺 Demonstração em Vídeo
 https://img.youtube.com/vi/JiyHZ6CiWt0/0.jpg
-
 Clique na imagem acima para ver o vídeo completo com:
 
-Login e autenticação JWT
-
-Dashboard de métricas em tempo real
-
-Funil de aprovação de feedbacks
-
-CRUD completo de usuários
+- Login e autenticação JWT
+- Dashboard de métricas em tempo real
+- Funil de aprovação de feedbacks
+- CRUD completo de usuários
 
 🔗 Link direto: https://www.youtube.com/watch?v=JiyHZ6CiWt0
-📁 Vídeo local: sistemasnps.mp4 (incluído no repositório)
 
-💡 A Origem do Projeto
-Inspirada pela minha trajetória em empresas de tecnologia e SaaS, identifiquei que o maior desafio na gestão de experiência do cliente não é apenas a coleta de dados, mas a execução eficiente do "fechamento do ciclo" (closed loop).
+🎯 Objetivo do Projeto
+Como Analista de Customer Success, identifiquei que o maior desafio não é coletar feedbacks, mas executar eficientemente o "closed loop". Este MVP transforma essa dor de negócio em uma solução técnica que:
 
-Como Analista de Sucesso do Cliente, desenvolvi este MVP para traduzir essa dor de negócio em uma solução técnica robusta. O sistema garante que nenhum feedback seja esquecido através de um workflow de governança:
+- Time Operacional: Registra resoluções detalhadas
+- Time Administrativo: Aprova/reprova ações via funil de workflow
+- Sistema: Garante auditoria completa e nenhum feedback esquecido
 
-Time Operacional: Registra resoluções detalhadas para as tratativas das avaliações.
-
-Time Administrativo: Possui uma visão de funil para aprovar ou reprovar as ações tomadas, fechando o ciclo de feedback com auditoria.
-
-🛠️ Arquitetura & Tecnologias
+🏗️ Arquitetura & Tecnologias
 Frontend
-https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
-https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white
-https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white
-https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white
+
+- React + TypeScript - Interface moderna e tipagem segura
+- Vite - Build tool rápido e eficiente
+- React Router - Navegação entre páginas
+- Context API - Gerenciamento de estado de autenticação
 
 Backend
-https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white
-https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white
-https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%2520web%2520tokens&logoColor=white
 
-Banco de Dados & Hospedagem
-https://img.shields.io/badge/Database-4169E1?style=for-the-badge&logo=postgresql&logoColor=white
-https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white
+- Node.js + Express - API REST robusta
+- JWT - Autenticação stateless segura
+- Middleware personalizado - Controle de acesso e validação
+
+Banco de Dados & Deploy
+
+- PostgreSQL - Banco de dados relacional
+- Vercel - Deploy do frontend
+- Render - Deploy da API
 
 📁 Estrutura do Projeto (Atual)
 text
@@ -81,6 +78,7 @@ projeto-nps-mvp/
 ├── 📄 LICENSE # Licença MIT
 ├── 📄 README.md # Esta documentação
 └── 🎥 sistemasnps.mp4 # Vídeo demonstrativo
+
 ⚡ Funcionalidades Implementadas
 🔐 Autenticação & Autorização
 
@@ -159,16 +157,18 @@ Login inicial: Configure seu primeiro usuário via backend
 
 🔧 Scripts Disponíveis
 Backend
-bash
-cd backend
-npm start # Inicia o servidor
-npm run dev # Desenvolvimento com nodemon (se configurado)
-Frontend
-bash
-cd frontend
-npm run dev # Desenvolvimento (localhost:5173)
-npm run build # Build para produção
-npm run preview # Visualiza build localmente
+
+- bash
+- cd backend
+- npm start # Inicia o servidor
+- npm run dev # Desenvolvimento com nodemon (se configurado)
+  Frontend
+- bash
+- cd frontend
+- npm run dev # Desenvolvimento (localhost:5173)
+- npm run build # Build para produção
+- npm run preview # Visualiza build localmente
+
 🗺️ Fluxo de Trabalho (Workflow)
 text
 Cliente → Pesquisa NPS → Sistema classifica (0-10)
@@ -186,13 +186,14 @@ Ciclo fechado com auditoria completa
 O backend expõe os seguintes endpoints principais:
 
 Método Endpoint Descrição
-POST /api/auth/login Autenticação de usuários
-GET /api/feedbacks Listar todos os feedbacks
-POST /api/feedbacks Criar novo feedback
-GET /api/users Listar usuários (admin)
-POST /api/users Criar usuário (admin)
-GET /api/metrics Obter métricas NPS
-Exemplo de uso no frontend (services/api.ts):
+
+- POST /api/auth/login Autenticação de usuários
+- GET /api/feedbacks Listar todos os feedbacks
+- POST /api/feedbacks Criar novo feedback
+- GET /api/users Listar usuários (admin)
+- POST /api/users Criar usuário (admin)
+- GET /api/metrics Obter métricas NPS
+- Exemplo de uso no frontend (services/api.ts):
 
 typescript
 // Estrutura básica para chamadas API
@@ -242,13 +243,8 @@ Banco de Dados
 👤 Sobre a Desenvolvedora
 Maria Andrezza
 Analista de Customer Success em transição para Desenvolvimento Full Stack
-
-https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white
-https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white
-
 "Transformando experiência em Customer Success em soluções técnicas robustas"
 
 📄 Licença
 Este projeto está licenciado sob a MIT License - veja o arquivo LICENSE para mais detalhes.
-
 Copyright © 2024 Maria Andrezza. Todos os direitos reservados.
