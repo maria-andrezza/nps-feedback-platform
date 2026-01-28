@@ -65,43 +65,57 @@ export default function PesquisaFeedback() {
           setEmpresaNome(`Empresa ${empresaId}`);
         }
 
-        // 2. Buscar TODOS os operacionais (sempre)
+        // 2. Buscar funcionários - COM TRATAMENTO PARA ERRO 401
+        let operacionaisEncontrados = [];
+
         try {
+          // Tenta buscar da rota protegida
           const response = await api.get("/api/admin/usuarios");
+
           if (response.data.success && response.data.usuarios) {
-            const operacionais = response.data.usuarios.filter(
+            operacionaisEncontrados = response.data.usuarios.filter(
               (u: any) => u.role === "operacional",
             );
 
-            console.log(`✅ ${operacionais.length} operacionais encontrados`);
-            setFuncionarios(
-              operacionais.map((u: any) => ({
-                id: u.id,
-                nome: u.nome || "Funcionário",
-                cargo: u.cargo || u.role || "Atendente",
-                email: u.email,
-              })),
+            console.log(
+              `✅ ${operacionaisEncontrados.length} operacionais encontrados (via admin)`,
             );
-
-            // Auto-selecionar se houver apenas um
-            if (operacionais.length === 1) {
-              setFuncionarioId(operacionais[0].id);
-            }
           }
-        } catch (err) {
-          console.error("❌ Erro ao buscar operacionais:", err);
-          // Usar dados mock como fallback
-          setFuncionarios([
-            { id: 1, nome: "Maria Santos", cargo: "Atendente" },
+        } catch (err: any) {
+          // SE FOR ERRO 401 (não autenticado) ou qualquer erro
+          console.log(
+            "ℹ️ Usando operacionais padrão:",
+            err.response?.status || err.message,
+          );
+
+          // FALLBACK: Usa lista padrão de operacionais
+          // ATENÇÃO: Use IDs que existem no seu banco!
+          operacionaisEncontrados = [
             { id: 2, nome: "João Silva", cargo: "Atendente" },
-            { id: 3, nome: "Carlos Oliveira", cargo: "Atendente" },
-            { id: 4, nome: "Ana Paula", cargo: "Gerente" },
-            { id: 5, nome: "Roberto Alves", cargo: "Supervisor" },
-          ]);
+            { id: 3, nome: "Maria Santos", cargo: "Atendente" },
+            { id: 4, nome: "Carlos Oliveira", cargo: "Atendente" },
+            { id: 5, nome: "João Operacional", cargo: "Atendente" },
+            { id: 10, nome: "Operacional Teste", cargo: "Atendente" },
+          ];
+        }
+
+        // Transformar dados para o formato esperado
+        setFuncionarios(
+          operacionaisEncontrados.map((u: any) => ({
+            id: u.id,
+            nome: u.nome || "Funcionário",
+            cargo: u.cargo || u.role || "Atendente",
+            email: u.email,
+          })),
+        );
+
+        // Auto-selecionar se houver apenas um
+        if (operacionaisEncontrados.length === 1) {
+          setFuncionarioId(operacionaisEncontrados[0].id);
         }
       } catch (err: any) {
         console.error("❌ Erro ao carregar dados:", err);
-        setError("Não foi possível carregar a lista de funcionários.");
+        setError("Não foi possível carregar alguns dados da pesquisa.");
       } finally {
         setLoading(false);
       }

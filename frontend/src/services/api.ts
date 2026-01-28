@@ -1,4 +1,4 @@
-// src/services/api.ts - VERSÃO SIMPLIFICADA E FUNCIONAL
+// src/services/api.ts - VERSÃO FIXADA PARA PÁGINAS PÚBLICAS
 import axios, { AxiosInstance } from "axios";
 
 // Criar instância do axios
@@ -24,8 +24,6 @@ api.interceptors.request.use(
       localStorage.getItem("token") || localStorage.getItem("nps_token");
 
     if (token && config.headers) {
-      // Garantir que headers é um objeto
-      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
 
@@ -36,22 +34,23 @@ api.interceptors.request.use(
   },
 );
 
-// Interceptor de resposta
+// Interceptor de resposta FIXADO - NÃO REDIRECIONA PARA LOGIN
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expirado ou inválido
-      localStorage.removeItem("token");
-      localStorage.removeItem("nps_token");
-      localStorage.removeItem("user");
+    // APENAS LOG NO CONSOLE, NÃO REDIRECIONA
+    console.error("❌ Erro na API:", {
+      status: error.response?.status,
+      url: error.config?.url,
+      method: error.config?.method,
+      message: error.response?.data?.error || error.message,
+    });
 
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
-      }
-    }
+    // IMPORTANTE: NÃO FAZ window.location.href = "/login"
+    // Isso permite que páginas públicas funcionem mesmo com erro 401
+
     return Promise.reject(error);
   },
 );
