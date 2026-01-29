@@ -229,10 +229,11 @@ app.post("/api/public/feedback", async (req, res) => {
       // Tenta buscar um usuario operacional vinculado a empresa via usuario_empresa
       const usuarioResult = await pool.query(
         `SELECT u.id 
-         FROM usuarios u
-         INNER JOIN usuario_empresa ue ON u.id = ue.usuario_id
-         WHERE ue.empresa_id = $1 AND u.role = 'operacional'
-         LIMIT 1`,
+   FROM usuarios u
+   INNER JOIN usuario_empresa ue ON u.id = ue.usuario_id
+   WHERE ue.empresa_id = $1 AND u.role = 'operacional'
+   ORDER BY u.id ASC  -- ADICIONAR ORDENAÇÃO FIXA
+   LIMIT 1`,
         [empresa_id],
       );
 
@@ -242,7 +243,7 @@ app.post("/api/public/feedback", async (req, res) => {
       } else {
         // Fallback: busca qualquer operacional com empresa_id na tabela usuarios
         const fallbackResult = await pool.query(
-          "SELECT id FROM usuarios WHERE empresa_id = $1 AND role = 'operacional' LIMIT 1",
+          "SELECT id FROM usuarios WHERE empresa_id = $1 AND role = 'operacional' ORDER BY id ASC LIMIT 1",
           [empresa_id],
         );
 
@@ -986,8 +987,6 @@ app.put("/api/admin/usuarios/:id/status", auth(["admin"]), async (req, res) => {
   }
 });
 
-// ======================= ROTAS ADMIN - GERENCIAMENTO DE EMPRESAS (ATUALIZADO) =======================
-// Listar empresas (com status)
 // ======================= ROTAS ADMIN - GERENCIAMENTO DE EMPRESAS (VERSÃO SIMPLIFICADA) =======================
 // Listar empresas (versão simplificada)
 app.get("/api/admin/empresas", auth(["admin"]), async (req, res) => {
@@ -1431,7 +1430,151 @@ app.get("/api/admin/relatorios", auth(["admin"]), async (req, res) => {
     });
   }
 });
+// ======================= ESTATÍSTICAS DO OPERACIONAL =======================
+app.get(
+  "/api/operacional/estatisticas",
+  auth(["operacional"]),
+  async (req, res) => {
+    try {
+      console.log(
+        "📊 Estatísticas para operacional:",
+        req.user.nome,
+        "ID:",
+        req.user.id,
+      );
 
+      // 1. Primeiro verificar empresas do usuário
+      const empresasResult = await pool.query(
+        `SELECT empresa_id FROM usuario_empresa WHERE usuario_id = $1`,
+        [req.user.id],
+      );
+
+      const empresaIds = empresasResult.rows.map((row) => row.empresa_id);
+      console.log("🏢 Empresas do usuário:", empresaIds);
+
+      // 2. Estatísticas PESSOAIS do operacional (SEM filtro de empresa)
+      const pessoalResult = await pool.query(
+        `SELECT 
+        COUNT(*) as total_avaliacoes,
+        ROUND(AVG(nota)::numeric, 2) as media_nota,
+        COUNT(CASE WHEN nota >= 9 THEN 1 END) as promotores,
+        COUNT(CASE WHEN nota <= 6 THEN 1 END) as detratores
+       FROM avaliacoes 
+       WHERE usuario_id = $1`,
+        [req.user.id],
+      );
+
+      const pessoal = pessoalResult.rows[0];
+      const totalPessoal = parseInt(pessoal.total_avaliacoes) || 0;
+      const mediaPessoal = parseFloat(pessoal.media_nota) || 0;
+      const promotores = parseInt(pessoal.promotores) || 0;
+      const detratores = parseInt(pessoal.detratores) || 0;
+
+      const npsPessoal =
+        totalPessoal > 0
+          ? Math.round(((promotores - detratores) / totalPessoal) * 100 * 10) /
+            10
+          : 0;
+
+      console.log("📈 Estatísticas pessoais:", {
+        total: totalPessoal,
+        media: mediaPessoal,
+        nps: npsPessoal,
+      });
+
+      // 3. Ranking: Se tiver empresa, mostra colegas. Se não, mostra apenas ele.
+      let rankingQuery;
+      let rankingParams;
+
+      if (empresaIds.length > 0) {
+        // TEM empresa: mostra colegas da mesma empresa
+        rankingQuery = `
+        SELECT 
+          u.id,
+          u.nome,
+          COUNT(a.id) as total_avaliacoes,
+          CASE 
+            WHEN COUNT(a.id) = 0 THEN 0.0
+            ELSE ROUND(AVG(a.nota)::numeric, 2)
+          END as media_nota,
+          CASE 
+            WHEN COUNT(a.id) = 0 THEN 0.0
+            ELSE ROUND(
+              ((COUNT(CASE WHEN a.nota >= 9 THEN 1 END)::float - 
+                COUNT(CASE WHEN a.nota <= 6 THEN 1 END)::float) / 
+               GREATEST(COUNT(a.id), 1) * 100)::numeric, 
+              1
+            )
+          END as nps_pessoal
+        FROM usuarios u
+        INNER JOIN usuario_empresa ue ON u.id = ue.usuario_id
+        LEFT JOIN avaliacoes a ON u.id = a.usuario_id
+        WHERE u.role = 'operacional'
+        AND ue.empresa_id = ANY($1)
+        GROUP BY u.id, u.nome
+        ORDER BY 
+          CASE WHEN COUNT(a.id) = 0 THEN 1 ELSE 0 END,
+          media_nota DESC NULLS LAST
+        LIMIT 10
+      `;
+        rankingParams = [empresaIds];
+      } else {
+        // NÃO TEM empresa: mostra apenas ele mesmo
+        rankingQuery = `
+        SELECT 
+          u.id,
+          u.nome,
+          COUNT(a.id) as total_avaliacoes,
+          CASE 
+            WHEN COUNT(a.id) = 0 THEN 0.0
+            ELSE ROUND(AVG(a.nota)::numeric, 2)
+          END as media_nota,
+          CASE 
+            WHEN COUNT(a.id) = 0 THEN 0.0
+            ELSE ROUND(
+              ((COUNT(CASE WHEN a.nota >= 9 THEN 1 END)::float - 
+                COUNT(CASE WHEN a.nota <= 6 THEN 1 END)::float) / 
+               GREATEST(COUNT(a.id), 1) * 100)::numeric, 
+              1
+            )
+          END as nps_pessoal
+        FROM usuarios u
+        LEFT JOIN avaliacoes a ON u.id = a.usuario_id
+        WHERE u.id = $1
+        GROUP BY u.id, u.nome
+      `;
+        rankingParams = [req.user.id];
+      }
+
+      const rankingResult = await pool.query(rankingQuery, rankingParams);
+
+      console.log(
+        "🏆 Ranking encontrado:",
+        rankingResult.rows.length,
+        "operacionais",
+      );
+
+      res.json({
+        success: true,
+        estatisticas_pessoais: {
+          total_avaliacoes: totalPessoal,
+          media_nota: mediaPessoal,
+          nps_pessoal: npsPessoal,
+          promotores: promotores,
+          detratores: detratores,
+        },
+        ranking_empresa: rankingResult.rows,
+        tem_empresa: empresaIds.length > 0,
+      });
+    } catch (error) {
+      console.error("❌ Erro em estatísticas do operacional:", error);
+      res.status(500).json({
+        success: false,
+        error: "Erro ao carregar estatísticas",
+      });
+    }
+  },
+);
 // ======================= ROTA 404 =======================
 app.use((req, res) => {
   res.status(404).json({

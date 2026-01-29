@@ -1,9 +1,10 @@
-// src/services/api.ts - VERSÃO FIXADA PARA PÁGINAS PÚBLICAS
+// src/services/api.ts - VOLTAR PARA PRODUÇÃO
 import axios, { AxiosInstance } from "axios";
 
-// Criar instância do axios
+// Criar instância do axios - PRODUÇÃO
 const api: AxiosInstance = axios.create({
-  baseURL: "https://nps-feedback-platform.onrender.com",
+  baseURL: "https://nps-feedback-platform.onrender.com", // ← PRODUÇÃO
+  // baseURL: "http://localhost:3001", // ← COMENTAR/REMOVER
   timeout: 10000,
 });
 

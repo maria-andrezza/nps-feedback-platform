@@ -132,103 +132,47 @@ export default function Dashboard() {
 
   const carregarRankingOperacionais = async () => {
     try {
-      // Carregar ranking dos operacionais
-      const response = await api.get("/api/admin/relatorios");
+      if (user?.role === "admin") {
+        // ADMIN: ranking global (mantém endpoint original)
+        const response = await api.get("/api/admin/relatorios");
 
-      if (response.data.success && response.data.relatorios?.top_atendentes) {
-        const operacionais = response.data.relatorios.top_atendentes.map(
-          (atendente: any) => ({
-            id: atendente.id || Math.random(),
-            nome: atendente.nome,
-            total_avaliacoes: parseInt(atendente.total_avaliacoes) || 0,
-            media_nota: parseFloat(atendente.media_nota) || 0,
-            nps_pessoal: parseFloat(atendente.nps_pessoal) || 0,
-          }),
-        );
-
-        setRankingOperacionais(operacionais);
+        if (response.data.success && response.data.relatorios?.top_atendentes) {
+          const operacionais = response.data.relatorios.top_atendentes.map(
+            (atendente: any) => ({
+              id: atendente.id || Math.random(),
+              nome: atendente.nome,
+              total_avaliacoes: parseInt(atendente.total_avaliacoes) || 0,
+              media_nota: parseFloat(atendente.media_nota) || 0,
+              nps_pessoal: parseFloat(atendente.nps_pessoal) || 0,
+            }),
+          );
+          setRankingOperacionais(operacionais);
+        } else {
+          // Se API retornar sem dados, array vazio
+          setRankingOperacionais([]);
+        }
       } else {
-        // Dados mock para operacionais
-        const mockOperacionais: OperacionalStats[] = [
-          {
-            id: 1,
-            nome: "João Silva",
-            total_avaliacoes: 45,
-            media_nota: 8.9,
-            nps_pessoal: 42.5,
-          },
-          {
-            id: 2,
-            nome: "Maria Santos",
-            total_avaliacoes: 38,
-            media_nota: 7.2,
-            nps_pessoal: 28.9,
-          },
-          {
-            id: 3,
-            nome: "Carlos Oliveira",
-            total_avaliacoes: 32,
-            media_nota: 6.8,
-            nps_pessoal: 18.4,
-          },
-          {
-            id: 4,
-            nome: "João Operacional",
-            total_avaliacoes: 25,
-            media_nota: 8.1,
-            nps_pessoal: 35.2,
-          },
-          {
-            id: 5,
-            nome: "Operacional Teste",
-            total_avaliacoes: 18,
-            media_nota: 7.5,
-            nps_pessoal: 24.7,
-          },
-        ];
-        setRankingOperacionais(mockOperacionais);
+        // OPERACIONAL: dados pessoais (novo endpoint)
+        const response = await api.get("/api/operacional/estatisticas");
+
+        if (response.data.success) {
+          const rankingData = response.data.ranking_empresa.map((op: any) => ({
+            id: op.id,
+            nome: op.nome,
+            total_avaliacoes: parseInt(op.total_avaliacoes) || 0,
+            media_nota: parseFloat(op.media_nota) || 0,
+            nps_pessoal: parseFloat(op.nps_pessoal) || 0,
+          }));
+
+          setRankingOperacionais(rankingData);
+        } else {
+          setRankingOperacionais([]);
+        }
       }
     } catch (err: any) {
       console.error("❌ Erro ao carregar ranking de operacionais:", err);
-      // Dados mock em caso de erro
-      const mockOperacionais: OperacionalStats[] = [
-        {
-          id: 1,
-          nome: "João Silva",
-          total_avaliacoes: 4,
-          media_nota: 8.5,
-          nps_pessoal: 50.0,
-        },
-        {
-          id: 2,
-          nome: "Carlos Oliveira",
-          total_avaliacoes: 3,
-          media_nota: 8.0,
-          nps_pessoal: 33.3,
-        },
-        {
-          id: 3,
-          nome: "João Operacional",
-          total_avaliacoes: 3,
-          media_nota: 7.3,
-          nps_pessoal: 0.0,
-        },
-        {
-          id: 4,
-          nome: "Anderson teste",
-          total_avaliacoes: 2,
-          media_nota: 5.5,
-          nps_pessoal: -100.0,
-        },
-        {
-          id: 5,
-          nome: "Maria Santos",
-          total_avaliacoes: 4,
-          media_nota: 5.3,
-          nps_pessoal: -50.0,
-        },
-      ];
-      setRankingOperacionais(mockOperacionais);
+      // EM CASO DE ERRO: array vazio (NÃO dados falsos!)
+      setRankingOperacionais([]);
     } finally {
       setLoading(false);
     }
