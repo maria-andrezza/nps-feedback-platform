@@ -657,7 +657,7 @@ app.get("/api/estatisticas", auth(), async (req, res) => {
           ROUND(AVG(nota)::numeric, 2) as media_geral
         FROM avaliacoes a
         LEFT JOIN empresas e ON a.empresa_id = e.id
-        WHERE e.status = 'ativo' OR e.id IS NULL
+        WHERE e.status = 'ativo'
       `),
 
         // Classificação NPS
@@ -668,7 +668,7 @@ app.get("/api/estatisticas", auth(), async (req, res) => {
           COUNT(CASE WHEN a.nota <= 6 THEN 1 END) as detratores
         FROM avaliacoes a
         LEFT JOIN empresas e ON a.empresa_id = e.id
-        WHERE e.status = 'ativo' OR e.id IS NULL
+        WHERE e.status = 'ativo' 
       `),
 
         // Status das avaliações
@@ -680,7 +680,7 @@ app.get("/api/estatisticas", auth(), async (req, res) => {
           COUNT(CASE WHEN a.status_aprovacao = 'reprovado' THEN 1 END) as reprovados
         FROM avaliacoes a
         LEFT JOIN empresas e ON a.empresa_id = e.id
-        WHERE e.status = 'ativo' OR e.id IS NULL
+        WHERE e.status = 'ativo' 
       `),
 
         // Rankings (mesma query da rota /api/estatisticas/rankings)
@@ -1102,7 +1102,7 @@ app.post("/api/admin/empresas", auth(["admin"]), async (req, res) => {
 // Listar todas avaliações (admin) - VERSÃO CORRIGIDA E FUNCIONAL
 app.get("/api/admin/avaliacoes", auth(["admin"]), async (req, res) => {
   try {
-    const { status, empresa_id, usuario_id, page = 1, limit = 20 } = req.query;
+    const { status, empresa_id, usuario_id, page = 1, limit = 100 } = req.query;
 
     console.log("📋 Listando avaliações com filtros:", {
       status,
@@ -1142,7 +1142,7 @@ app.get("/api/admin/avaliacoes", auth(["admin"]), async (req, res) => {
       FROM avaliacoes a
       LEFT JOIN usuarios u ON a.usuario_id = u.id
       LEFT JOIN empresas e ON a.empresa_id = e.id
-      WHERE 1=1
+      WHERE e.status = 'ativo' -- ESTA LINHA SINCRONIZA COM O DASHBOARD
     `;
 
     const params = [];
@@ -1195,7 +1195,12 @@ app.get("/api/admin/avaliacoes", auth(["admin"]), async (req, res) => {
     console.log(`✅ Encontradas ${result.rows.length} avaliações`);
 
     // Query de contagem (mais simples)
-    let countQuery = `SELECT COUNT(*) FROM avaliacoes a WHERE 1=1`;
+    let countQuery = `
+  SELECT COUNT(*) 
+  FROM avaliacoes a 
+  LEFT JOIN empresas e ON a.empresa_id = e.id 
+  WHERE e.status = 'ativo'
+`;
     const countParams = [];
     let countParamCount = 0;
 

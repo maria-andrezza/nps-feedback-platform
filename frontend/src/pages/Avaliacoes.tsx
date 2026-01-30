@@ -41,7 +41,6 @@ import BusinessIcon from "@mui/icons-material/Business";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import VerifiedIcon from "@mui/icons-material/Verified";
-import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import SearchIcon from "@mui/icons-material/Search";
 import MessageIcon from "@mui/icons-material/Message";
 import RateReviewIcon from "@mui/icons-material/RateReview";
@@ -93,7 +92,7 @@ export default function Avaliacoes() {
           ? "/api/admin/avaliacoes"
           : "/api/operacional/avaliacoes";
 
-      const response = await api.get(endpoint);
+      const response = await api.get(`${endpoint}?limit=100`);
 
       if (response.data.success) {
         setAvaliacoes(response.data.avaliacoes);
@@ -519,7 +518,9 @@ export default function Avaliacoes() {
       </Box>
 
       {/* Cards de resumo */}
+      {/* Cards de resumo - Lógica de Funil/Processo */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* 1. Total (Geral) */}
         <Grid item xs={12} sm={6} md={3}>
           <Card
             sx={{
@@ -537,7 +538,7 @@ export default function Avaliacoes() {
             <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
               <AssessmentIcon sx={{ mr: 1.5, fontSize: 28 }} />
               <Typography variant="h6" fontWeight={600}>
-                Total Avaliações
+                Total Geral
               </Typography>
             </Box>
             <Typography variant="h3" fontWeight={800}>
@@ -546,6 +547,7 @@ export default function Avaliacoes() {
           </Card>
         </Grid>
 
+        {/* 2. Pendentes (Fase Operacional) */}
         <Grid item xs={12} sm={6} md={3}>
           <Card
             sx={{
@@ -563,18 +565,53 @@ export default function Avaliacoes() {
             <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
               <PendingActionsIcon sx={{ mr: 1.5, fontSize: 28 }} />
               <Typography variant="h6" fontWeight={600}>
-                Pendentes
+                Pendentes (Op)
               </Typography>
             </Box>
             <Typography variant="h3" fontWeight={800}>
               {
-                avaliacoes.filter((av) => av.status_operacional === "pendente")
-                  .length
+                avaliacoes.filter(
+                  (av) => (av.status_operacional || av.status) === "pendente",
+                ).length
               }
             </Typography>
           </Card>
         </Grid>
 
+        {/* 3. Aguardando Aprovação (Fase Admin) */}
+        <Grid item xs={12} sm={6} md={3}>
+          <Card
+            sx={{
+              borderRadius: 3,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+              background: "linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)",
+              color: "white",
+              p: 2.5,
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
+              <GavelIcon sx={{ mr: 1.5, fontSize: 28 }} />
+              <Typography variant="h6" fontWeight={600}>
+                Para Aprovar
+              </Typography>
+            </Box>
+            <Typography variant="h3" fontWeight={800}>
+              {
+                avaliacoes.filter(
+                  (av) =>
+                    (av.status_operacional || av.status) === "resolvido" &&
+                    av.status_admin === "pendente",
+                ).length
+              }
+            </Typography>
+          </Card>
+        </Grid>
+
+        {/* 4. Aprovadas (Finalizadas) */}
         <Grid item xs={12} sm={6} md={3}>
           <Card
             sx={{
@@ -592,37 +629,11 @@ export default function Avaliacoes() {
             <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
               <VerifiedIcon sx={{ mr: 1.5, fontSize: 28 }} />
               <Typography variant="h6" fontWeight={600}>
-                Aprovadas
+                Finalizadas
               </Typography>
             </Box>
             <Typography variant="h3" fontWeight={800}>
               {avaliacoes.filter((av) => av.status_admin === "aprovado").length}
-            </Typography>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={6} md={3}>
-          <Card
-            sx={{
-              borderRadius: 3,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-              background: "linear-gradient(135deg, #f44336 0%, #ef5350 100%)",
-              color: "white",
-              p: 2.5,
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
-              <SentimentVeryDissatisfiedIcon sx={{ mr: 1.5, fontSize: 28 }} />
-              <Typography variant="h6" fontWeight={600}>
-                Detratores
-              </Typography>
-            </Box>
-            <Typography variant="h3" fontWeight={800}>
-              {avaliacoes.filter((av) => av.nota <= 6).length}
             </Typography>
           </Card>
         </Grid>
